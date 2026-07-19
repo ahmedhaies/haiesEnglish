@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Node (used only for local icon generation / testing)
+node_modules/
+package-lock.json
+
+# Local build source caches (large raw datasets are not committed)
+scratchpad/
+sources/
+*.log
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,18 @@
+{
+  "total": 8500,
+  "withExample": 6129,
+  "withIpa": 8461,
+  "withSynonyms": 5564,
+  "withExtraSenses": 6254,
+  "wordsPerDayDefault": 15,
+  "unitSize": 50,
+  "builtAt": "2026-07-19",
+  "sources": [
+    "WordNet 3.0 (Princeton) — frequency-ranked senses",
+    "google-10000-english (USA)",
+    "hermitdave/FrequencyWords en_50k",
+    "wordset/wordset-dictionary (MIT)",
+    "michmech/lemmatization-lists",
+    "open-dict-data/ipa-dict (en_US)"
+  ]
+}
