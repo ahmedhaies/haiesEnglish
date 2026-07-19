@@ -5,11 +5,11 @@ import { store } from '../store.js';
 import { wordAt } from '../data.js';
 import { navigate } from '../router.js';
 import { ICONS } from '../icons.js';
-import { grade } from '../srs.js';
+import { grade, previewIntervals } from '../srs.js';
 import { speak } from '../speech.js';
 import { buildQueue, buildQueueForIndices } from '../session.js';
-import { unitWords } from '../data.js';
-import { wordVisual, definitionHTML, speakButton, wireSpeak, ringSVG, animateRings } from '../ui.js';
+import { unitWords, emojiFor } from '../data.js';
+import { wordVisual, definitionHTML, speakButton, listenAllButton, wireSpeak, ringSVG, animateRings } from '../ui.js';
 import { posLabel, posColor, escapeHtml } from '../util.js';
 import { checkBadges, badgeName } from '../achievements.js';
 import { toast, confetti } from '../fx.js';
@@ -53,6 +53,7 @@ function drawCard() {
   const lang = getLang();
   const prog = Math.round((sess.i / sess.q.length) * 100);
 
+  const em = emojiFor(rec.w);
   host.innerHTML = `
     <div class="session-top">
       <button class="icon-btn" data-exit>${ICONS.x}</button>
@@ -62,18 +63,24 @@ function drawCard() {
     <div class="flashwrap">
       <div class="flashcard" id="card">
         <div class="face face-front">
-          ${item.isNew ? `<span class="chip on" style="position:absolute;top:16px;inset-inline-start:16px">${t('new_short')}</span>` : ''}
-          ${wordVisual(rec)}
+          ${item.isNew ? `<span class="chip on card-flag">✦ ${t('new_short')}</span>` : ''}
+          <div class="fc-visual">${wordVisual(rec)}</div>
           <div class="word-en">${escapeHtml(rec.w)}</div>
           ${rec.i ? `<div class="word-ipa">/${escapeHtml(rec.i)}/</div>` : ''}
           <span class="pos-badge" style="background:${posColor(rec.p)}">${posLabel(rec.p, lang)}</span>
-          <div style="margin-top:6px">${speakButton(rec.w)}</div>
+          <button class="speak-btn speak-lg" data-speak="${escapeHtml(rec.w)}">${ICONS.speaker}<span>${t('pronounce')}</span></button>
           <div class="flip-hint">${ICONS.refresh} ${t('flip_hint')}</div>
         </div>
         <div class="face face-back">
-          <div style="width:100%;display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:6px">
-            <span class="word-en" style="font-size:1.6rem">${escapeHtml(rec.w)}</span>
-            ${speakButton(rec.w)}
+          <div class="fc-back-head">
+            <div class="fc-back-word">
+              ${em ? `<span class="fc-back-emoji">${em}</span>` : ''}
+              <div>
+                <div class="word-en" style="font-size:1.5rem;line-height:1.1">${escapeHtml(rec.w)}</div>
+                ${rec.i ? `<div class="word-ipa" style="font-size:.92rem">/${escapeHtml(rec.i)}/</div>` : ''}
+              </div>
+            </div>
+            ${listenAllButton(rec)}
           </div>
           ${definitionHTML(rec)}
         </div>
@@ -89,17 +96,27 @@ function drawCard() {
   sess.revealed = false;
 }
 
+function fmtDays(d) {
+  const ar = getLang() === 'ar';
+  if (d <= 0) return ar ? 'الآن' : 'now';
+  if (d === 1) return ar ? 'يوم' : '1d';
+  if (d < 30) return ar ? `${d} يوم` : `${d}d`;
+  const mo = Math.round(d / 30);
+  return ar ? (mo === 1 ? 'شهر' : `${mo} شهر`) : `${mo}mo`;
+}
+
 function drawControls() {
   const c = document.getElementById('controls');
   if (!sess.revealed) {
     c.innerHTML = `<button class="btn btn-primary btn-lg btn-block reveal-btn" id="reveal">${ICONS.arrow} ${t('show_answer')}</button>`;
     c.querySelector('#reveal').addEventListener('click', reveal);
   } else {
+    const iv = previewIntervals(sess.q[sess.i].idx);
     c.innerHTML = `<div class="grade-row">
-      <button class="grade g-again" data-g="0">${t('again')}<small>&lt;1${t('minutes_short')}</small></button>
-      <button class="grade g-hard" data-g="1">${t('hard')}</button>
-      <button class="grade g-good" data-g="2">${t('good')}</button>
-      <button class="grade g-easy" data-g="3">${t('easy')}</button>
+      <button class="grade g-again" data-g="0">${t('again')}<small>${fmtDays(iv[0])}</small></button>
+      <button class="grade g-hard" data-g="1">${t('hard')}<small>${fmtDays(iv[1])}</small></button>
+      <button class="grade g-good" data-g="2">${t('good')}<small>${fmtDays(iv[2])}</small></button>
+      <button class="grade g-easy" data-g="3">${t('easy')}<small>${fmtDays(iv[3])}</small></button>
     </div>`;
     c.querySelectorAll('[data-g]').forEach((b) => b.addEventListener('click', () => doGrade(+b.dataset.g)));
   }

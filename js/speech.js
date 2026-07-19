@@ -19,16 +19,41 @@ if ('speechSynthesis' in window) {
 
 export function canSpeak() { return 'speechSynthesis' in window; }
 
+function utter(text, rate) {
+  const u = new SpeechSynthesisUtterance(text);
+  if (usVoice) u.voice = usVoice;
+  u.lang = 'en-US';
+  u.rate = rate;
+  u.pitch = 1;
+  return u;
+}
+
 export function speak(text, { rate = 0.92 } = {}) {
   if (!('speechSynthesis' in window)) return;
   if (store.settings.sound === false) return;
   try {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    if (usVoice) u.voice = usVoice;
-    u.lang = 'en-US';
-    u.rate = rate;
-    u.pitch = 1;
-    window.speechSynthesis.speak(u);
+    window.speechSynthesis.speak(utter(text, rate));
   } catch (e) { /* ignore */ }
+}
+
+// Read several English parts in order (word, definition, example…) with a small
+// gap between them. onPart(index) fires as each part begins, for highlighting.
+export function speakSequence(parts, { rate = 0.9, onPart, onEnd } = {}) {
+  if (!('speechSynthesis' in window)) return;
+  if (store.settings.sound === false) return;
+  try {
+    window.speechSynthesis.cancel();
+    const clean = parts.map((p) => (p || '').trim()).filter(Boolean);
+    clean.forEach((text, i) => {
+      const u = utter(text, rate);
+      if (onPart) u.onstart = () => onPart(i);
+      if (onEnd && i === clean.length - 1) u.onend = () => onEnd();
+      window.speechSynthesis.speak(u);
+    });
+  } catch (e) { /* ignore */ }
+}
+
+export function stopSpeak() {
+  if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
 }

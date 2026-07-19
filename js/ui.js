@@ -4,7 +4,7 @@ import { t, getLang } from './i18n.js';
 import { emojiFor } from './data.js';
 import { store } from './store.js';
 import { posLabel, posColor, escapeHtml } from './util.js';
-import { speak, canSpeak } from './speech.js';
+import { speak, canSpeak, speakSequence } from './speech.js';
 import { ICONS } from './icons.js';
 
 // Build a DOM node from an HTML string (single root).
@@ -91,21 +91,46 @@ export function speakButton(word) {
   return `<button class="speak-btn" data-speak="${escapeHtml(word)}">${ICONS.speaker}<span>${t('tap_to_hear')}</span></button>`;
 }
 
-// Full definition markup for the back of a flashcard / detail sheet.
+// A small round "speaker" button that reads `text` aloud when tapped.
+function spk(text) {
+  if (!canSpeak() || !text) return '';
+  return `<button class="mini-spk" data-speak="${escapeHtml(text)}" aria-label="${escapeHtml(t('listen'))}">${ICONS.speaker}</button>`;
+}
+function lblRow(label, text) {
+  return `<div class="def-lbl-row"><span class="def-lbl">${label}</span>${spk(text)}</div>`;
+}
+
+// "Listen to all" — reads word, then meaning, then example, in sequence.
+export function listenAllButton(rec) {
+  if (!canSpeak()) return '';
+  const seq = [rec.w, rec.d, rec.e].filter(Boolean).join('|||');
+  return `<button class="btn btn-soft listen-all" data-speak-seq="${escapeHtml(seq)}">${ICONS.speaker}<span>${t('listen_all')}</span></button>`;
+}
+
+// Full definition markup (audio on every English part) for the flashcard back
+// and the word-detail sheet.
 export function definitionHTML(rec) {
   const lang = getLang();
-  let html = '';
-  html += `<div class="def-block">`;
+  let html = `<div class="def-block">`;
   html += `<span class="pos-badge" style="background:${posColor(rec.p)}">${posLabel(rec.p, lang)}</span>`;
-  html += `<div class="def-lbl">${t('meaning')}</div><div class="def-main">${escapeHtml(rec.d)}</div>`;
-  if (rec.e) html += `<div class="def-lbl">${t('example')}</div><div class="example">${highlightExample(rec.e, rec.w)}</div>`;
+  html += lblRow(t('meaning'), rec.d);
+  html += `<div class="def-main" data-speak="${escapeHtml(rec.d)}">${escapeHtml(rec.d)}</div>`;
+  if (rec.e) {
+    html += lblRow(t('example'), rec.e);
+    html += `<div class="example" data-speak="${escapeHtml(rec.e)}">${highlightExample(rec.e, rec.w)}</div>`;
+  }
   if (rec.s && rec.s.length) {
-    html += `<div class="def-lbl">${t('synonyms')}</div><div class="syn-row">${rec.s.map((x) => `<span class="syn">${escapeHtml(x)}</span>`).join('')}</div>`;
+    html += lblRow(t('synonyms'), rec.s.join(', '));
+    html += `<div class="syn-row">${rec.s.map((x) => `<span class="syn" data-speak="${escapeHtml(x)}">${escapeHtml(x)}</span>`).join('')}</div>`;
   }
   if (rec.m && rec.m.length) {
-    html += `<div class="def-lbl">${t('more_meanings')}</div>`;
+    html += `<div class="def-lbl" style="margin-top:14px">${t('more_meanings')}</div>`;
     for (const m of rec.m) {
-      html += `<div class="sense"><span class="p">${posLabel(m.p, lang)}</span><div class="def-main" style="font-size:1rem">${escapeHtml(m.d)}</div>${m.e ? `<div class="example" style="margin-top:6px">${highlightExample(m.e, rec.w)}</div>` : ''}</div>`;
+      const seqText = m.d + (m.e ? '. ' + m.e : '');
+      html += `<div class="sense"><div class="def-lbl-row"><span class="p">${posLabel(m.p, lang)}</span>${spk(seqText)}</div>`;
+      html += `<div class="def-main" style="font-size:1rem" data-speak="${escapeHtml(m.d)}">${escapeHtml(m.d)}</div>`;
+      html += m.e ? `<div class="example" style="margin-top:6px" data-speak="${escapeHtml(m.e)}">${highlightExample(m.e, rec.w)}</div>` : '';
+      html += `</div>`;
     }
   }
   html += `</div>`;
@@ -113,31 +138,38 @@ export function definitionHTML(rec) {
 }
 
 export function openWordDetail(rec) {
-  const stageColors = { new: '', learning: 'st-learning', learned: 'st-learned', mastered: 'st-mastered' };
   const inner = `
     <div style="text-align:center">${wordVisual(rec)}</div>
     <div style="text-align:center;margin:10px 0 4px">
       <div class="word-en">${escapeHtml(rec.w)}</div>
       ${rec.i ? `<div class="word-ipa">/${escapeHtml(rec.i)}/</div>` : ''}
-      <div style="margin-top:10px">${speakButton(rec.w)}</div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${speakButton(rec.w)}${listenAllButton(rec)}</div>
     </div>
     ${definitionHTML(rec)}
     <button class="btn btn-soft btn-block" style="margin-top:18px" data-close>${t('close')}</button>`;
   const ov = openSheet(inner);
   wireSpeak(ov);
   ov.querySelector('[data-close]').addEventListener('click', closeSheet);
-  // auto-pronounce on open
   setTimeout(() => speak(rec.w), 250);
 }
 
-// Attach speak handlers within a scope.
+// Attach speak handlers within a scope: single [data-speak] and [data-speak-seq].
 export function wireSpeak(scope) {
   scope.querySelectorAll('[data-speak]').forEach((b) => {
     b.addEventListener('click', (e) => {
       e.stopPropagation();
       speak(b.dataset.speak);
+      b.classList.add('spk-on');
+      setTimeout(() => b.classList.remove('spk-on'), 700);
+    });
+  });
+  scope.querySelectorAll('[data-speak-seq]').forEach((b) => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parts = b.dataset.speakSeq.split('|||');
       b.classList.add('playing');
-      setTimeout(() => b.classList.remove('playing'), 900);
+      speakSequence(parts, { onEnd: () => b.classList.remove('playing') });
+      setTimeout(() => b.classList.remove('playing'), 8000);
     });
   });
 }

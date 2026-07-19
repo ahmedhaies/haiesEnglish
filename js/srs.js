@@ -44,6 +44,23 @@ export function grade(idx, g, isNew) {
   return { xp, leveledTo, correct };
 }
 
+// Preview the next interval (in days) for each grade, without mutating state.
+// Returns [again, hard, good, easy]; 0 means "again this session".
+export function previewIntervals(idx) {
+  const r = store.s.srs[idx] || { ef: 2.5, iv: 0, reps: 0 };
+  const calc = (g) => {
+    if (g === 0) return 0;
+    const q = g === 1 ? 3 : g === 2 ? 4 : 5;
+    const ef = clamp(r.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)), 1.3, 2.8);
+    let iv;
+    if (r.reps === 0) iv = g === 1 ? 1 : g === 3 ? 3 : 1;
+    else if (r.reps === 1) iv = g === 1 ? 3 : g === 3 ? 8 : 6;
+    else iv = Math.max(r.reps ? r.iv + 1 : 1, Math.round(r.iv * ef * (g === 1 ? 0.6 : g === 3 ? 1.3 : 1)));
+    return clamp(iv, 1, 400);
+  };
+  return [0, calc(1), calc(2), calc(3)];
+}
+
 // Whether a due word should be shown again within THIS session (failed cards).
 export function needsReintro(idx) {
   const r = store.s.srs[idx];
