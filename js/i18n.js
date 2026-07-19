@@ -3,7 +3,7 @@
 export const STRINGS = {
   ar: {
     dir: 'rtl', lang: 'ar', name: 'العربية',
-    appName: 'هايس إنجلش', tagline: 'رحلتك اليومية لإتقان الإنجليزية',
+    appName: 'حايس إنجلش', tagline: 'رحلتك اليومية لإتقان الإنجليزية',
     nav_home: 'الرئيسية', nav_learn: 'ذاكِر', nav_quiz: 'اختبار', nav_browse: 'الكلمات', nav_calendar: 'التقويم', nav_stats: 'إحصائياتي', nav_settings: 'الإعدادات', nav_achievements: 'الإنجازات',
     greeting_morning: 'صباح الخير', greeting_afternoon: 'مساء الخير', greeting_evening: 'مساء الخير', greeting_night: 'سهرة سعيدة',
     today_plan: 'خطة اليوم', new_words: 'كلمات جديدة', reviews: 'مراجعات', due_now: 'مستحقة الآن',
@@ -12,6 +12,7 @@ export const STRINGS = {
     learned: 'كلمات تعلمتها', mastered: 'أتقنتها', total_words: 'إجمالي الكلمات', remaining: 'المتبقي', progress: 'التقدّم',
     know: 'أعرفها', dont_know: 'لا أعرفها', again: 'كرّرها', hard: 'صعبة', good: 'جيدة', easy: 'سهلة', show_answer: 'اعرض المعنى', next: 'التالي', flip_hint: 'اضغط لقلب البطاقة',
     example: 'مثال', synonyms: 'مرادفات', meaning: 'المعنى', more_meanings: 'معانٍ أخرى', pronounce: 'استمع للنطق', part_of_speech: 'نوع الكلمة', listen_all: 'استمع للكل', listen: 'استمع',
+    watch_videos: 'شاهدها في فيديو', see_images: 'صور حقيقية',
     quiz_title: 'اختبر نفسك', quiz_intro: 'اختر نوع الاختبار وابدأ', quiz_choose_meaning: 'اختر المعنى الصحيح', quiz_choose_word: 'اختر الكلمة الصحيحة', quiz_spelling: 'اكتب الكلمة', quiz_listening: 'اختبار الاستماع',
     quiz_today: 'كلمات اليوم', quiz_unit: 'اختبار وحدة', quiz_learned: 'كل ما تعلمته', quiz_start: 'ابدأ الاختبار', question: 'سؤال', of: 'من', correct: 'إجابة صحيحة', wrong: 'إجابة خاطئة', your_score: 'نتيجتك', quiz_again: 'أعد الاختبار', review_mistakes: 'راجع أخطاءك', type_here: 'اكتب هنا…', check: 'تحقّق', skip: 'تخطّى',
     units: 'الوحدات', unit: 'وحدة', words: 'كلمة', browse_all: 'كل الكلمات', search_placeholder: 'ابحث عن كلمة…', filter_all: 'الكل', filter_new: 'جديدة', filter_learning: 'قيد التعلّم', filter_learned: 'متعلّمة', filter_mastered: 'متقنة', no_results: 'لا توجد نتائج',
@@ -46,6 +47,7 @@ export const STRINGS = {
     learned: 'Words learned', mastered: 'Mastered', total_words: 'Total words', remaining: 'Remaining', progress: 'Progress',
     know: 'I know it', dont_know: "Don't know", again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', show_answer: 'Show meaning', next: 'Next', flip_hint: 'Tap to flip the card',
     example: 'Example', synonyms: 'Synonyms', meaning: 'Meaning', more_meanings: 'Other meanings', pronounce: 'Listen', part_of_speech: 'Part of speech', listen_all: 'Listen to all', listen: 'Listen',
+    watch_videos: 'Watch in videos', see_images: 'Real images',
     quiz_title: 'Test yourself', quiz_intro: 'Pick a quiz type and go', quiz_choose_meaning: 'Choose the correct meaning', quiz_choose_word: 'Choose the correct word', quiz_spelling: 'Type the word', quiz_listening: 'Listening quiz',
     quiz_today: "Today's words", quiz_unit: 'Unit quiz', quiz_learned: 'Everything learned', quiz_start: 'Start quiz', question: 'Question', of: 'of', correct: 'Correct', wrong: 'Wrong', your_score: 'Your score', quiz_again: 'Retry quiz', review_mistakes: 'Review mistakes', type_here: 'Type here…', check: 'Check', skip: 'Skip',
     units: 'Units', unit: 'Unit', words: 'words', browse_all: 'All words', search_placeholder: 'Search a word…', filter_all: 'All', filter_new: 'New', filter_learning: 'Learning', filter_learned: 'Learned', filter_mastered: 'Mastered', no_results: 'No results',

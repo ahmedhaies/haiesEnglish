@@ -2,16 +2,19 @@
 // a word's index IS its rank-1 and is the stable key used everywhere else.
 let WORDS = [];
 let EMOJI = {};
+let ICONP = {};
 let MANIFEST = { total: 0, unitSize: 50, wordsPerDayDefault: 15 };
 let byWord = new Map();
 
 export async function loadData(onProgress) {
-  const [manifest, emoji] = await Promise.all([
+  const [manifest, emoji, icons] = await Promise.all([
     fetch('data/manifest.json').then((r) => r.json()).catch(() => ({})),
     fetch('data/emoji.json').then((r) => r.json()).catch(() => ({})),
+    fetch('data/icons.json').then((r) => r.json()).catch(() => ({})),
   ]);
   MANIFEST = Object.assign(MANIFEST, manifest);
   EMOJI = emoji || {};
+  ICONP = icons || {};
   if (onProgress) onProgress(0.2);
 
   // stream words.json with progress if possible
@@ -46,6 +49,7 @@ export function manifest() { return MANIFEST; }
 export function wordAt(idx) { return WORDS[idx]; }
 export function indexOfWord(w) { return byWord.has(w) ? byWord.get(w) : -1; }
 export function emojiFor(w) { return EMOJI[w] || null; }
+export function iconFor(w) { return ICONP[w] || null; }
 
 // Units (for testing "in parts"): fixed-size contiguous blocks by frequency.
 export function unitSize() { return MANIFEST.unitSize || 50; }

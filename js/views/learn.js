@@ -8,8 +8,8 @@ import { ICONS } from '../icons.js';
 import { grade, previewIntervals } from '../srs.js';
 import { speak } from '../speech.js';
 import { buildQueue, buildQueueForIndices } from '../session.js';
-import { unitWords, emojiFor } from '../data.js';
-import { wordVisual, definitionHTML, speakButton, listenAllButton, wireSpeak, ringSVG, animateRings } from '../ui.js';
+import { unitWords } from '../data.js';
+import { wordVisual, wordThumb, definitionHTML, speakButton, listenAllButton, exploreLinks, wireSpeak, ringSVG, animateRings } from '../ui.js';
 import { posLabel, posColor, escapeHtml } from '../util.js';
 import { checkBadges, badgeName } from '../achievements.js';
 import { toast, confetti } from '../fx.js';
@@ -53,7 +53,6 @@ function drawCard() {
   const lang = getLang();
   const prog = Math.round((sess.i / sess.q.length) * 100);
 
-  const em = emojiFor(rec.w);
   host.innerHTML = `
     <div class="session-top">
       <button class="icon-btn" data-exit>${ICONS.x}</button>
@@ -74,7 +73,7 @@ function drawCard() {
         <div class="face face-back">
           <div class="fc-back-head">
             <div class="fc-back-word">
-              ${em ? `<span class="fc-back-emoji">${em}</span>` : ''}
+              <span class="fc-back-emoji">${wordThumb(rec)}</span>
               <div>
                 <div class="word-en" style="font-size:1.5rem;line-height:1.1">${escapeHtml(rec.w)}</div>
                 ${rec.i ? `<div class="word-ipa" style="font-size:.92rem">/${escapeHtml(rec.i)}/</div>` : ''}
@@ -83,6 +82,7 @@ function drawCard() {
             ${listenAllButton(rec)}
           </div>
           ${definitionHTML(rec)}
+          ${exploreLinks(rec.w)}
         </div>
       </div>
     </div>

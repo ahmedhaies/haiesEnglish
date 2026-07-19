@@ -2,10 +2,10 @@
 // Finishing them all completes the system. Each level drills into its lessons.
 import { t, getLang } from '../i18n.js';
 import { store } from '../store.js';
-import { unitWords, unitRange, wordAt, emojiFor } from '../data.js';
+import { unitWords, unitRange, wordAt } from '../data.js';
 import { navigate } from '../router.js';
 import { ICONS } from '../icons.js';
-import { ringSVG, animateRings, openWordDetail } from '../ui.js';
+import { ringSVG, animateRings, openWordDetail, wordThumb } from '../ui.js';
 import { escapeHtml, fmtNum } from '../util.js';
 import { LEVELS, levelName, levelStat, levelEnd, unitsOfLevel, overall, currentLevel, allComplete } from '../levels.js';
 
@@ -132,8 +132,8 @@ function openUnitSheet(unitIdx, lvl) {
     const idxs = unitWords(unitIdx);
     const p = unitProgress({ start: a, end: b });
     const rows = idxs.map((i) => {
-      const rec = wordAt(i); const em = emojiFor(rec.w); const stg = store.stageOf(i);
-      return `<div class="wcard" data-idx="${i}"><div class="wcard-ic">${em || `<span style="font-family:var(--font-en);font-weight:800;color:${lvl.color}">${escapeHtml(rec.w[0].toUpperCase())}</span>`}</div>
+      const rec = wordAt(i); const stg = store.stageOf(i);
+      return `<div class="wcard" data-idx="${i}"><div class="wcard-ic">${wordThumb(rec, lvl.color)}</div>
         <div class="wcard-mid"><div class="wcard-en">${escapeHtml(rec.w)} <span class="stage-dot st-${stg}"></span></div><div class="wcard-def">${escapeHtml(rec.d)}</div></div></div>`;
     }).join('');
     const inner = `

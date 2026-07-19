@@ -1,7 +1,7 @@
 // Shared UI helpers used across views: element builder, bottom sheet/modal,
 // progress ring, animated counters, and the word-detail card.
 import { t, getLang } from './i18n.js';
-import { emojiFor } from './data.js';
+import { emojiFor, iconFor } from './data.js';
 import { store } from './store.js';
 import { posLabel, posColor, escapeHtml } from './util.js';
 import { speak, canSpeak, speakSequence } from './speech.js';
@@ -78,12 +78,34 @@ export function highlightExample(ex, word) {
   } catch { return safe; }
 }
 
-// Visual for a word (emoji, else colored letter tile).
+// Big visual for a word: emoji → line icon (tinted) → colored letter tile.
+// Every word gets a clean visual, so no card is ever bare.
 export function wordVisual(rec, big = true) {
   const em = emojiFor(rec.w);
   if (em) return `<div class="word-emoji">${em}</div>`;
   const col = posColor(rec.p);
+  const path = iconFor(rec.w);
+  if (path) return `<div class="word-icon" style="--vc:${col}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg></div>`;
   return `<div class="word-tile" style="background:linear-gradient(135deg,${col},${col}bb)">${escapeHtml(rec.w[0].toUpperCase())}</div>`;
+}
+
+// Compact thumbnail (list rows, card headers): emoji char → small icon → letter.
+export function wordThumb(rec, col) {
+  const c = col || posColor(rec.p);
+  const em = emojiFor(rec.w);
+  if (em) return `<span class="wt-emoji">${em}</span>`;
+  const path = iconFor(rec.w);
+  if (path) return `<span class="wt-icon" style="--vc:${c}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg></span>`;
+  return `<span style="font-family:var(--font-en);font-weight:800;color:${c}">${escapeHtml(rec.w[0].toUpperCase())}</span>`;
+}
+
+// "Explore" links: see the word inside real videos / photos (opens externally).
+export function exploreLinks(word) {
+  const w = encodeURIComponent(word);
+  return `<div class="explore-row">
+    <a class="explore-btn" href="https://youglish.com/pronounce/${w}/english" target="_blank" rel="noopener">🎬 <span>${t('watch_videos')}</span></a>
+    <a class="explore-btn" href="https://openverse.org/search/image?q=${w}" target="_blank" rel="noopener">🖼️ <span>${t('see_images')}</span></a>
+  </div>`;
 }
 
 export function speakButton(word) {
@@ -146,6 +168,7 @@ export function openWordDetail(rec) {
       <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${speakButton(rec.w)}${listenAllButton(rec)}</div>
     </div>
     ${definitionHTML(rec)}
+    ${exploreLinks(rec.w)}
     <button class="btn btn-soft btn-block" style="margin-top:18px" data-close>${t('close')}</button>`;
   const ov = openSheet(inner);
   wireSpeak(ov);

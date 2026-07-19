@@ -26,7 +26,7 @@ export function grade(idx, g, isNew) {
     // SM-2 quality mapping: hard~3, good~4, easy~5
     const q = g === 1 ? 3 : g === 2 ? 4 : 5;
     r.ef = clamp(r.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)), 1.3, 2.8);
-    if (r.reps === 0) r.iv = g === 1 ? 1 : g === 3 ? 3 : 1;
+    if (r.reps === 0) r.iv = g === 1 ? 1 : g === 3 ? 4 : 2;
     else if (r.reps === 1) r.iv = g === 1 ? 3 : g === 3 ? 8 : 6;
     else r.iv = Math.max(r.reps ? r.iv + 1 : 1, Math.round(r.iv * r.ef * (g === 1 ? 0.6 : g === 3 ? 1.3 : 1)));
     r.iv = clamp(r.iv, 1, 400);
@@ -53,7 +53,7 @@ export function previewIntervals(idx) {
     const q = g === 1 ? 3 : g === 2 ? 4 : 5;
     const ef = clamp(r.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)), 1.3, 2.8);
     let iv;
-    if (r.reps === 0) iv = g === 1 ? 1 : g === 3 ? 3 : 1;
+    if (r.reps === 0) iv = g === 1 ? 1 : g === 3 ? 4 : 2;
     else if (r.reps === 1) iv = g === 1 ? 3 : g === 3 ? 8 : 6;
     else iv = Math.max(r.reps ? r.iv + 1 : 1, Math.round(r.iv * ef * (g === 1 ? 0.6 : g === 3 ? 1.3 : 1)));
     return clamp(iv, 1, 400);

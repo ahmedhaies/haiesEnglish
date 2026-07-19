@@ -2,10 +2,10 @@
 // live inside Levels.)
 import { t, getLang } from '../i18n.js';
 import { store } from '../store.js';
-import { words, wordAt, total, emojiFor } from '../data.js';
+import { words, wordAt, total } from '../data.js';
 import { ICONS } from '../icons.js';
 import { escapeHtml, fmtNum, posColor } from '../util.js';
-import { openWordDetail } from '../ui.js';
+import { openWordDetail, wordThumb } from '../ui.js';
 
 const PAGE = 60;
 let state = { q: '', filter: 'all', shown: PAGE };
@@ -55,10 +55,9 @@ function paint(root) {
 
 function wordRow(i) {
   const rec = wordAt(i);
-  const em = emojiFor(rec.w);
   const stage = store.stageOf(i);
   return `<div class="wcard" data-idx="${i}">
-    <div class="wcard-ic">${em || `<span style="font-family:var(--font-en);font-weight:800;color:${posColor(rec.p)}">${escapeHtml(rec.w[0].toUpperCase())}</span>`}</div>
+    <div class="wcard-ic">${wordThumb(rec)}</div>
     <div class="wcard-mid">
       <div class="wcard-en">${escapeHtml(rec.w)} <span class="stage-dot st-${stage}" style="display:inline-block;vertical-align:middle"></span></div>
       <div class="wcard-def">${escapeHtml(rec.d)}</div>
