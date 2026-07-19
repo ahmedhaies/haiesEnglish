@@ -1,11 +1,13 @@
 name: Deploy to GitHub Pages
 
+# Runs on demand (and on pushes to main). The site can ALSO be served with zero
+# config via Settings > Pages > "Deploy from a branch" (default branch, / root),
+# which needs no workflow at all.
 on:
+  workflow_dispatch:
   push:
     branches:
-      - claude/english-learning-platform-wspzqu
       - main
-  workflow_dispatch:
 
 permissions:
   contents: read
