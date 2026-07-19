@@ -13,6 +13,7 @@ export function render(root) {
   const lang = getLang();
   const s = store.settings;
   root.innerHTML = `
+   <div class="narrow">
     <div class="section-title"><h2>${t('settings_title')}</h2></div>
 
     <div class="card card-p">
@@ -55,6 +56,7 @@ export function render(root) {
       <p class="muted" style="font-size:.8rem">${lang === 'ar' ? 'كل بياناتك محفوظة على جهازك فقط.' : 'All your data is stored on your device only.'}</p>
     </div>
     <input type="file" id="importfile" accept="application/json" hidden />
+   </div>
   `;
 
   // language

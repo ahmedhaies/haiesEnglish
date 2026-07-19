@@ -29,8 +29,10 @@ export function render(root) {
       <div class="tile"><div class="tile-ic" style="background:var(--grad-success)">✅</div><b>${activeDays}</b><span>${t('active_days')}</span></div>
     </div>
 
-    <div class="cal" id="monthcal"></div>
-    <div class="cal" id="heat" style="margin-top:16px"></div>`;
+    <div class="cal-cols">
+      <div class="cal" id="monthcal"></div>
+      <div class="cal" id="heat"></div>
+    </div>`;
 
   root.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => navigate(b.dataset.go)));
   drawMonth(root.querySelector('#monthcal'));

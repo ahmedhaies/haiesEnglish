@@ -17,7 +17,7 @@ export function render(root) {
     <div class="segment" id="filt" style="margin-bottom:14px;flex-wrap:wrap">
       ${['all', 'new', 'learning', 'learned', 'mastered'].map((f) => `<button data-v="${f}" class="${state.filter === f ? 'on' : ''}">${t('filter_' + f)}</button>`).join('')}
     </div>
-    <div class="wordlist" id="list"></div>
+    <div class="wordlist wordlist-2" id="list"></div>
     <div id="more" style="text-align:center;margin-top:16px"></div>`;
 
   const input = root.querySelector('#q');

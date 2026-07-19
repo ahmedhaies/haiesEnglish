@@ -25,6 +25,7 @@ function renderSetup(root) {
   const lang = getLang();
   const learned = store.counts().seen;
   root.innerHTML = `
+   <div class="narrow">
     <div class="section-title"><h2>${t('quiz_title')}</h2></div>
     <p class="muted" style="margin:0 4px 16px">${t('quiz_intro')}</p>
 
@@ -54,6 +55,7 @@ function renderSetup(root) {
 
     <button class="btn btn-primary btn-lg btn-block" id="startq" style="margin-top:18px" ${learned < 4 ? 'disabled' : ''}>${ICONS.play} ${t('quiz_start')}</button>
     ${learned < 4 ? `<p class="muted center" style="margin-top:10px">${lang === 'ar' ? 'تعلّم بعض الكلمات أولًا لفتح الاختبارات.' : 'Learn a few words first to unlock quizzes.'}</p>` : ''}
+   </div>
   `;
 
   const state = { scope: 'recent', type: 'mixed', count: 12, unit: 0 };
