@@ -1,11 +1,12 @@
 // Service worker: makes the app installable and fully usable offline after the
 // first visit. App shell + data are precached; everything same-origin is cached
 // on demand; Google Fonts are runtime-cached too.
-const VERSION = 'haies-en-v1';
+const VERSION = 'haies-en-v2';
 const CORE = [
   './',
   './index.html',
   './css/styles.css',
+  './css/fonts.css',
   './manifest.webmanifest',
   './data/words.json',
   './data/emoji.json',

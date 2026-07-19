@@ -29,7 +29,7 @@ function renderSetup(root) {
     <p class="muted" style="margin:0 4px 16px">${t('quiz_intro')}</p>
 
     <div class="card card-p">
-      <div class="def-lbl">${t('quiz_choose_meaning')} / ${t('units')}</div>
+      <div class="def-lbl">${lang === 'ar' ? 'اختر النطاق' : 'Scope'}</div>
       <div class="segment" id="scope" style="margin:8px 0 18px">
         <button data-v="recent" class="on">🕒 ${t('quiz_today')}</button>
         <button data-v="learned">🎓 ${t('quiz_learned')}</button>
@@ -38,7 +38,7 @@ function renderSetup(root) {
 
       <div id="scope-extra"></div>
 
-      <div class="def-lbl">${t('nav_quiz')}</div>
+      <div class="def-lbl">${lang === 'ar' ? 'نوع الاختبار' : 'Quiz type'}</div>
       <div class="segment" id="qtype" style="margin:8px 0 18px">
         <button data-v="mixed" class="on">🔀 ${lang === 'ar' ? 'متنوّع' : 'Mixed'}</button>
         <button data-v="meaning">📖 ${t('quiz_choose_meaning')}</button>
@@ -46,7 +46,7 @@ function renderSetup(root) {
         <button data-v="spell">⌨️ ${t('quiz_spelling')}</button>
       </div>
 
-      <div class="def-lbl">${t('question')}s</div>
+      <div class="def-lbl">${lang === 'ar' ? 'عدد الأسئلة' : 'Questions'}</div>
       <div class="segment" id="qcount" style="margin:8px 0 6px">
         <button data-v="8">8</button><button data-v="12" class="on">12</button><button data-v="20">20</button>
       </div>

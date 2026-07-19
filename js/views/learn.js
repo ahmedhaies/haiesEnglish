@@ -7,7 +7,8 @@ import { navigate } from '../router.js';
 import { ICONS } from '../icons.js';
 import { grade } from '../srs.js';
 import { speak } from '../speech.js';
-import { buildQueue } from '../session.js';
+import { buildQueue, buildQueueForIndices } from '../session.js';
+import { unitWords } from '../data.js';
 import { wordVisual, definitionHTML, speakButton, wireSpeak, ringSVG, animateRings } from '../ui.js';
 import { posLabel, posColor, escapeHtml } from '../util.js';
 import { checkBadges, badgeName } from '../achievements.js';
@@ -19,7 +20,12 @@ let sess = null;
 
 export function render(root, params) {
   const mode = params && params[0] ? params[0] : 'daily';
-  const q = buildQueue(mode, mode === 'ahead' ? store.settings.wordsPerDay : 0);
+  let q;
+  if (mode === 'unit' && params[1] != null) {
+    q = buildQueueForIndices(unitWords(+params[1]));
+  } else {
+    q = buildQueue(mode, mode === 'ahead' ? store.settings.wordsPerDay : 0);
+  }
   if (!q.length) return renderEmpty(root);
   sess = { q, i: 0, revealed: false, correct: 0, total: 0, newCount: 0, revCount: 0, start: Date.now(), levelUps: [], badges: [] };
   root.innerHTML = `<div id="session"></div>`;

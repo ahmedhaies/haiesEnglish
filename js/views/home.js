@@ -8,6 +8,7 @@ import { levelFromXp, fmtNum } from '../util.js';
 import { ringSVG, animateRings, animateCounts, greeting } from '../ui.js';
 import { todayGoal } from '../session.js';
 import { BADGES, badgeName } from '../achievements.js';
+import { currentLevel, levelStat, levelName, overall, allComplete } from '../levels.js';
 
 export function render(root) {
   const lang = getLang();
@@ -64,6 +65,9 @@ export function render(root) {
       <div class="tile"><div class="tile-ic" style="background:var(--grad-teal)">📚</div><b>${pct}%</b><span>${t('progress')}</span></div>
     </div>
 
+    <div class="section-title"><h2>${t('nav_levels')}</h2><a class="link" data-go="levels">${t('levels_title')} ${ICONS.chevron}</a></div>
+    ${levelStrip(lang)}
+
     <div class="section-title"><h2>${t('quiz_title')}</h2><a class="link" data-go="quiz">${t('quiz_start')} ${ICONS.chevron}</a></div>
     <div class="grid" style="grid-template-columns:1fr 1fr">
       <button class="card card-p" style="text-align:start" data-go="quiz">
@@ -90,6 +94,24 @@ export function render(root) {
 }
 
 function wIcon(svg) { return `<span style="color:#fff;display:grid;place-content:center">${svg}</span>`; }
+
+function levelStrip(lang) {
+  if (allComplete()) {
+    return `<button class="card card-p" style="width:100%;background:var(--grad);color:#fff;text-align:start;display:flex;gap:14px;align-items:center" data-go="levels">
+      <div style="font-size:40px">🎓</div><div><b style="font-family:var(--font-head);font-size:1.1rem">${t('system_complete')}</b></div></button>`;
+  }
+  const cur = currentLevel();
+  const st = levelStat(cur);
+  return `<button class="level-card current" style="--lc:${cur.color};width:100%;text-align:start" data-go="levels/${cur.id}">
+    <div class="level-node">${cur.emoji}</div>
+    <div class="level-body">
+      <div class="level-top"><b>${t('level')} ${cur.id} · <span style="color:${cur.color}">${cur.cefr}</span> ${levelName(cur, lang)}</b><span class="lvl-badge cur">${t('level_current')}</span></div>
+      <div class="unit-prog" style="margin-top:8px"><span style="width:${st.pct}%;background:${cur.color}"></span></div>
+      <div class="muted" style="font-size:.76rem;margin-top:5px">${st.learned}/${st.size} · ${st.pct}%</div>
+    </div>
+    <div class="level-chev">${ICONS.chevron}</div>
+  </button>`;
+}
 
 function recentBadges(lang) {
   const unlocked = BADGES.filter((b) => store.s.achievements[b.id]);

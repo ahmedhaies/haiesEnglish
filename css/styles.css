@@ -87,7 +87,7 @@ input, select { font-family: inherit; }
 .app { min-height: 100vh; }
 .app[hidden] { display: none; }
 .view {
-  max-width: var(--maxw); margin: 0 auto; padding: 22px 18px 120px;
+  width: 100%; max-width: 760px; margin-inline: auto; padding: 20px 16px 120px;
   animation: viewIn .42s cubic-bezier(.22, 1, .36, 1);
 }
 @keyframes viewIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
@@ -102,7 +102,7 @@ input, select { font-family: inherit; }
   }
   .topbar { display: none !important; }
   .bottomnav { display: none !important; }
-  .view { padding: 30px 34px 60px; }
+  .view { max-width: 1120px; padding: 34px 44px 72px; }
 }
 .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 16px; }
 .brand-mark { width: 40px; height: 40px; border-radius: 12px; flex: none; box-shadow: 0 6px 16px rgba(99, 102, 241, .35); }
@@ -346,6 +346,35 @@ input, select { font-family: inherit; }
 .unit-prog { height: 6px; border-radius: 99px; background: var(--surface-2); margin-top: 10px; overflow: hidden; }
 .unit-prog > span { display: block; height: 100%; background: var(--grad-success); border-radius: 99px; }
 .unit-badge { position: absolute; top: 10px; inset-inline-end: 10px; font-size: 16px; }
+
+/* ---------- Levels / journey ---------- */
+.journey-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.journey-head-info { flex: 1; min-width: 200px; }
+.jh-big b { font-size: 2rem; font-family: var(--font-head); font-weight: 800; }
+.jh-big span { color: var(--muted); font-size: .9rem; }
+.levels-path { display: grid; gap: 14px; margin-top: 18px; position: relative; }
+@media (min-width: 760px) { .levels-path { grid-template-columns: 1fr 1fr; } }
+.level-card {
+  display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--surface);
+  border-radius: var(--r-lg); box-shadow: var(--shadow); border: 1.5px solid var(--border-2);
+  cursor: pointer; transition: var(--trans); position: relative; overflow: hidden;
+}
+.level-card::before { content: ''; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 5px; background: var(--lc); opacity: .8; }
+.level-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.level-card.current { border-color: var(--lc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lc) 22%, transparent), var(--shadow); }
+.level-card.upcoming { opacity: .74; }
+.level-node {
+  width: 56px; height: 56px; border-radius: 18px; display: grid; place-content: center; font-size: 30px; flex: none;
+  background: color-mix(in srgb, var(--lc) 16%, var(--surface)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--lc) 35%, transparent);
+}
+.level-body { flex: 1; min-width: 0; }
+.level-top { display: flex; align-items: center; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
+.level-top b { font-family: var(--font-head); font-size: 1.02rem; }
+.lvl-badge { font-size: .68rem; font-weight: 800; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+.lvl-badge.done { background: rgba(34, 197, 94, .16); color: var(--success); }
+.lvl-badge.cur { background: var(--tint); color: var(--primary); }
+.level-chev { color: var(--muted); flex: none; }
+:root[dir="rtl"] .level-chev svg { transform: scaleX(-1); }
 
 /* ---------- Calendar heatmap ---------- */
 .cal { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 18px; }

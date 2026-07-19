@@ -31,4 +31,5 @@ export const ICONS = {
   download: S('<path d="M12 3v12M7 11l5 4 5-4M5 21h14"/>'),
   chevron: S('<path d="m9 6 6 6-6 6"/>'),
   spark: S('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'),
+  levels: S('<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>'),
 };

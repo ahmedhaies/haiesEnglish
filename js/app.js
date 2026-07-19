@@ -12,22 +12,28 @@ import { checkBadges } from './achievements.js';
 import * as home from './views/home.js';
 import * as learn from './views/learn.js';
 import * as quiz from './views/quiz.js';
+import * as levels from './views/levels.js';
 import * as browse from './views/browse.js';
 import * as calendar from './views/calendar.js';
 import * as stats from './views/stats.js';
 import * as achievements from './views/achievements.js';
 import * as settings from './views/settings.js';
 
-const VIEWS = { home, learn, quiz, browse, calendar, stats, achievements, settings };
+const VIEWS = { home, learn, quiz, levels, browse, calendar, stats, achievements, settings };
 
 const NAV = [
   { id: 'home', icon: 'home', label: 'nav_home' },
   { id: 'learn', icon: 'learn', label: 'nav_learn' },
+  { id: 'levels', icon: 'levels', label: 'nav_levels' },
   { id: 'quiz', icon: 'quiz', label: 'nav_quiz' },
-  { id: 'browse', icon: 'browse', label: 'nav_browse' },
   { id: 'stats', icon: 'stats', label: 'nav_stats' },
 ];
-const SIDE = [...NAV.slice(0, 4),
+const SIDE = [
+  { id: 'home', icon: 'home', label: 'nav_home' },
+  { id: 'learn', icon: 'learn', label: 'nav_learn' },
+  { id: 'levels', icon: 'levels', label: 'nav_levels' },
+  { id: 'quiz', icon: 'quiz', label: 'nav_quiz' },
+  { id: 'browse', icon: 'browse', label: 'nav_browse' },
   { id: 'calendar', icon: 'calendar', label: 'nav_calendar' },
   { id: 'stats', icon: 'stats', label: 'nav_stats' },
   { id: 'achievements', icon: 'badge', label: 'nav_achievements' },

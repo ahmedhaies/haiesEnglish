@@ -2,7 +2,7 @@
 // brand-new words, and reports today's progress toward the goal.
 import { store } from './store.js';
 import { total } from './data.js';
-import { dayKey } from './util.js';
+import { dayKey, dayNum } from './util.js';
 import { shuffle } from './util.js';
 
 export function dueReviewIdx() { return store.dueList(); }
@@ -28,6 +28,25 @@ export function buildQueue(mode = 'daily', extraNew = 0) {
     if (news.length) q.push({ idx: news.shift(), isNew: true });
     if (reviews.length) q.push({ idx: reviews.shift(), isNew: false });
     if (reviews.length) q.push({ idx: reviews.shift(), isNew: false });
+  }
+  return q;
+}
+
+// Build a session from an explicit set of word indices (e.g. one unit/level):
+// introduce unseen words and mix in any of those words that are due for review.
+export function buildQueueForIndices(indices, maxNew = 9999) {
+  const today = dayNum();
+  const fresh = [], due = [];
+  for (const i of indices) {
+    if (!store.isSeen(i)) { if (fresh.length < maxNew) fresh.push(i); }
+    else if (store.srsOf(i).due <= today) due.push(i);
+  }
+  const q = [];
+  const r = due.slice(), n = fresh.slice();
+  for (let i = 0; i < 2 && r.length; i++) q.push({ idx: r.shift(), isNew: false });
+  while (r.length || n.length) {
+    if (n.length) q.push({ idx: n.shift(), isNew: true });
+    if (r.length) q.push({ idx: r.shift(), isNew: false });
   }
   return q;
 }
