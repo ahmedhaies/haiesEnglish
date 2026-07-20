@@ -144,7 +144,17 @@ function doGrade(g) {
     const insertAt = Math.min(sess.q.length, sess.i + 3);
     sess.q.splice(insertAt, 0, { idx: item.idx, isNew: false });
   }
+  // Commit progress after EVERY card: keep the streak alive, unlock badges, and
+  // refresh the XP/level chrome live — so nothing is lost if the learner leaves
+  // before finishing the whole queue.
+  store.touchStreak();
+  const nb = checkBadges();
+  if (nb.length) {
+    sess.badges.push(...nb);
+    nb.forEach((b, k) => setTimeout(() => toast(`${b.icon} ${badgeName(b, getLang())}`, { icon: '🏅' }), 300 + k * 550));
+  }
   store.save();
+  refreshChrome();
 
   const card = document.getElementById('card');
   card.style.transition = 'transform .32s ease, opacity .32s ease';
@@ -154,9 +164,10 @@ function doGrade(g) {
 }
 
 function finish() {
-  // streak + badges + celebration
-  const streak = store.touchStreak();
-  const newBadges = checkBadges();
+  // streak + badges already committed per-card; summarise them here
+  store.touchStreak();
+  const seenId = new Set();
+  const newBadges = sess.badges.filter((b) => !seenId.has(b.id) && seenId.add(b.id));
   store.save();
   refreshChrome();
 
@@ -177,7 +188,7 @@ function finish() {
         ${statMini(sess.revCount, t('reviews'), 'var(--primary)')}
         ${statMini(mins + t('minutes_short'), t('time_studied'), 'var(--teal)')}
       </div>
-      ${streak.changed ? `<div class="pill-note" style="justify-content:center;margin:6px auto">🔥 ${store.s.streak.current} ${t('days')} · ${streak.froze ? t('freeze_used') : t('day_streak_kept')}</div>` : ''}
+      <div class="pill-note" style="justify-content:center;margin:6px auto">🔥 ${store.s.streak.current} ${t('days')} · ${t('day_streak_kept')}</div>
       ${sess.levelUps.length ? `<div class="pill-note" style="justify-content:center;margin:8px auto;background:var(--grad);color:#fff">🚀 ${t('level_up')} ${Math.max(...sess.levelUps)}!</div>` : ''}
       ${newBadges.length ? `<div style="margin:14px 0">
         <div class="def-lbl" style="text-align:center">${t('new_badge')}</div>
@@ -193,7 +204,6 @@ function finish() {
   host.querySelector('[data-go]').addEventListener('click', () => navigate('home'));
   host.querySelector('[data-again]').addEventListener('click', () => render(document.getElementById('view'), ['ahead']));
   if (acc >= 80 || newBadges.length || sess.levelUps.length) confetti();
-  if (newBadges.length) newBadges.forEach((b, k) => setTimeout(() => toast(`${b.icon} ${badgeName(b, lang)}`, { icon: '🏅' }), 400 + k * 700));
 }
 
 function statMini(val, label, color) {

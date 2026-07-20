@@ -107,7 +107,7 @@ function levelStrip(lang) {
     <div class="level-body">
       <div class="level-top"><b>${t('level')} ${cur.id} · <span style="color:${cur.color}">${cur.cefr}</span> ${levelName(cur, lang)}</b><span class="lvl-badge cur">${t('level_current')}</span></div>
       <div class="unit-prog" style="margin-top:8px"><span style="width:${st.pct}%;background:${cur.color}"></span></div>
-      <div class="muted" style="font-size:.76rem;margin-top:5px">${st.learned}/${st.size} · ${st.pct}%</div>
+      <div class="muted" style="font-size:.76rem;margin-top:5px">${st.seen}/${st.size} ${t('studied')} · ${st.pct}%</div>
     </div>
     <div class="level-chev">${ICONS.chevron}</div>
   </button>`;

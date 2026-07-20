@@ -22,19 +22,27 @@ export function levelOfIndex(idx) {
   return LEVELS[LEVELS.length - 1];
 }
 
+// Progress for a range of words (a level or a lesson). The bar fills as you
+// study: a word you've started counts half, a learned/mastered word counts
+// full — so a first study pass shows real movement (not a stuck 0%).
+export function bandStat(start, end) {
+  const size = Math.max(1, end - start);
+  let seen = 0, learned = 0, mastered = 0, score = 0;
+  for (let i = start; i < end; i++) {
+    const st = store.stageOf(i);
+    if (st === 'new') continue;
+    seen++;
+    if (st === 'mastered') { mastered++; learned++; score += 1; }
+    else if (st === 'learned') { learned++; score += 1; }
+    else score += 0.5;   // seen but still learning
+  }
+  const pct = Math.round((score / size) * 100);
+  return { size, seen, learned, mastered, score, pct, complete: learned >= size, started: seen > 0 };
+}
+
 // Progress for one level from the current SRS state.
 export function levelStat(lvl) {
-  const end = levelEnd(lvl);
-  const size = Math.max(1, end - lvl.start);
-  let seen = 0, learned = 0, mastered = 0;
-  for (let i = lvl.start; i < end; i++) {
-    const st = store.stageOf(i);
-    if (st !== 'new') seen++;
-    if (st === 'learned' || st === 'mastered') learned++;
-    if (st === 'mastered') mastered++;
-  }
-  const pct = Math.round((learned / size) * 100);
-  return { size, seen, learned, mastered, pct, complete: learned >= size, started: seen > 0 };
+  return bandStat(lvl.start, levelEnd(lvl));
 }
 
 // Level the learner is currently working through (first not-complete).
@@ -56,9 +64,11 @@ export function unitsOfLevel(lvl) {
   return out;
 }
 
-// Overall progress across everything.
+// Overall progress across everything (same weighting as bandStat).
 export function overall() {
   const t = total() || 1;
   const c = store.counts();
-  return { learned: c.learned + c.mastered, seen: c.seen, total: t, pct: Math.round(((c.learned + c.mastered) / t) * 100) };
+  const learned = c.learned + c.mastered;
+  const score = c.learning * 0.5 + learned;
+  return { learned, seen: c.seen, total: t, pct: Math.round((score / t) * 100) };
 }

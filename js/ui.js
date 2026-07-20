@@ -99,25 +99,22 @@ export function wordThumb(rec, col) {
   return `<span style="font-family:var(--font-en);font-weight:800;color:${c}">${escapeHtml(rec.w[0].toUpperCase())}</span>`;
 }
 
-// Stable pseudo-random number from a word (so each word keeps the same photo).
-function hashNum(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h % 100000; }
-
-// Which words are worth a real photo (skip pure function words — a random photo
-// for "the" would only confuse). Anything with a curated emoji/icon qualifies.
+// Which words are worth a real photo (skip pure function words — a photo for
+// "the" would only confuse). Anything with a curated emoji/icon qualifies.
 export function wantsPhoto(rec) {
   if (emojiFor(rec.w) || iconFor(rec.w)) return true;
   return ['n', 'v', 'adj'].includes(rec.p) && rec.w.length > 3;
 }
 
-// Big visual with a REAL photo shown on top; if the photo can't load (offline /
-// no match) the emoji/icon/tile underneath stays — so it's never broken.
+// Big visual with a REAL photo shown on top; the src is filled in later by
+// resolvePhoto() (Wikipedia's canonical page image). Until/unless it loads, the
+// emoji/icon/tile underneath stays — so it's never broken.
 export function wordPhoto(rec) {
   const inner = wordVisual(rec);
   if (!wantsPhoto(rec)) return `<div class="word-media">${inner}</div>`;
-  const src = `https://loremflickr.com/360/240/${encodeURIComponent(rec.w)}?lock=${hashNum(rec.w)}`;
   return `<div class="word-media has-photo">
     <div class="photo-fallback">${inner}</div>
-    <img class="word-photo" data-photo src="${src}" alt="${escapeHtml(rec.w)}" loading="lazy" referrerpolicy="no-referrer">
+    <img class="word-photo" data-photo data-word="${escapeHtml(rec.w)}" alt="${escapeHtml(rec.w)}" loading="lazy" referrerpolicy="no-referrer">
   </div>`;
 }
 
@@ -147,13 +144,31 @@ function ensureYouglish() {
 }
 let vidSeq = 0;
 
-// Wire embedded media within a scope: reveal photos on load (keep fallback on
-// error) and expand the inline video player on demand.
+// Resolve a canonical, on-topic photo for a word via Wikipedia's page image —
+// far more representative than a random keyword photo. No clear image → keep
+// the emoji/icon/tile fallback.
+const photoCache = new Map();
+async function resolvePhoto(word, img) {
+  if (photoCache.has(word)) { const u = photoCache.get(word); if (u) img.src = u; else img.remove(); return; }
+  try {
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`, { headers: { accept: 'application/json' } });
+    if (r.ok) {
+      const j = await r.json();
+      const src = j && j.type !== 'disambiguation' && ((j.thumbnail && j.thumbnail.source) || (j.originalimage && j.originalimage.source));
+      if (src) { photoCache.set(word, src); img.src = src; return; }
+    }
+  } catch (e) { /* offline / blocked */ }
+  photoCache.set(word, null);
+  img.remove();
+}
+
+// Wire embedded media within a scope: resolve + reveal photos (keep fallback on
+// failure) and expand the inline video player on demand.
 export function wireMedia(scope) {
   scope.querySelectorAll('img[data-photo]').forEach((img) => {
-    if (img.complete && img.naturalWidth) img.classList.add('ok');
     img.addEventListener('load', () => { if (img.naturalWidth) img.classList.add('ok'); });
     img.addEventListener('error', () => img.remove());
+    resolvePhoto(img.dataset.word, img);
   });
   scope.querySelectorAll('.video-embed').forEach((box) => {
     const btn = box.querySelector('.video-btn');

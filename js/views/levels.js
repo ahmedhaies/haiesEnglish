@@ -7,7 +7,7 @@ import { navigate } from '../router.js';
 import { ICONS } from '../icons.js';
 import { ringSVG, animateRings, openWordDetail, wordThumb } from '../ui.js';
 import { escapeHtml, fmtNum } from '../util.js';
-import { LEVELS, levelName, levelStat, levelEnd, unitsOfLevel, overall, currentLevel, allComplete } from '../levels.js';
+import { LEVELS, levelName, levelStat, levelEnd, unitsOfLevel, overall, currentLevel, allComplete, bandStat } from '../levels.js';
 
 export function render(root, params) {
   if (params && params[0] != null) return renderLevel(root, +params[0]);
@@ -26,7 +26,7 @@ function renderPath(root) {
     <div class="card card-p journey-head">
       ${ringSVG(ov.pct, 128, 13, `<div class="ring-label"><b>${ov.pct}%</b><span>${t('overall_progress')}</span></div>`)}
       <div class="journey-head-info">
-        <div class="jh-big"><b data-count="${ov.learned}">0</b> <span>/ ${fmtNum(ov.total)} ${t('words')}</span></div>
+        <div class="jh-big"><b data-count="${ov.seen}">0</b> <span>/ ${fmtNum(ov.total)} ${t('words')}</span></div>
         <div class="progressbar" style="height:12px;margin:12px 0"><span style="width:${ov.pct}%"></span></div>
         <div class="muted" style="font-size:.88rem">${done ? t('system_complete') : `${lang === 'ar' ? 'مستواك الحالي' : 'Current level'}: ${cur.emoji} ${cur.cefr} · ${levelName(cur, lang)}`}</div>
       </div>
@@ -66,7 +66,7 @@ function levelCard(lvl, i, lang, cur) {
         </div>
         <div class="muted" style="font-size:.78rem;font-family:var(--font-en);direction:ltr;text-align:${lang === 'ar' ? 'right' : 'left'}">#${lvl.start + 1}–${end} · ${end - lvl.start} ${t('words')}</div>
         <div class="unit-prog" style="margin-top:8px"><span style="width:${st.pct}%;background:${lvl.color}"></span></div>
-        <div class="muted" style="font-size:.76rem;margin-top:5px">${st.learned}/${st.size} · ${st.pct}%</div>
+        <div class="muted" style="font-size:.76rem;margin-top:5px">${st.seen}/${st.size} ${t('studied')} · ${st.pct}%</div>
       </div>
       <div class="level-chev">${ICONS.chevron}</div>
     </div>`;
@@ -91,7 +91,7 @@ function renderLevel(root, id) {
     <div class="card card-p" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
       ${ringSVG(st.pct, 104, 11, `<div class="ring-label"><b>${st.pct}%</b></div>`)}
       <div style="flex:1;min-width:160px">
-        <div class="muted" style="font-size:.9rem">${st.learned} / ${st.size} ${t('learned')}</div>
+        <div class="muted" style="font-size:.9rem">${st.seen} / ${st.size} ${t('studied')} · ${st.learned} ${t('learned')}</div>
         <div class="progressbar" style="height:10px;margin-top:8px"><span style="width:${st.pct}%;background:${lvl.color}"></span></div>
       </div>
       ${firstOpen ? `<button class="btn btn-primary" data-study="${firstOpen.unit}">${ICONS.play} ${t('study_level')}</button>` : `<div class="pill-note">${ICONS.check} ${t('level_complete')}</div>`}
@@ -109,20 +109,19 @@ function renderLevel(root, id) {
 }
 
 function unitProgress(u) {
-  let done = 0, size = u.end - u.start;
-  for (let i = u.start; i < u.end; i++) if (['learned', 'mastered'].includes(store.stageOf(i))) done++;
-  return { done, size, pct: Math.round((done / size) * 100) };
+  const s = bandStat(u.start, u.end);
+  return { done: s.learned, seen: s.seen, size: s.size, pct: s.pct, complete: s.complete };
 }
 
 function unitCard(u, lang, lvl) {
   const p = unitProgress(u);
   const n = u.unit + 1;
   return `<div class="unit-card" data-openunit="${u.unit}">
-    ${p.pct === 100 ? '<span class="unit-badge">✅</span>' : ''}
+    ${p.complete ? '<span class="unit-badge">✅</span>' : ''}
     <b>${t('lesson')} ${n}</b>
     <div class="rng">#${u.start + 1}–${u.end}</div>
     <div class="unit-prog"><span style="width:${p.pct}%;background:${lvl.color}"></span></div>
-    <div class="muted" style="font-size:.74rem;margin-top:6px">${p.done}/${p.size}</div>
+    <div class="muted" style="font-size:.74rem;margin-top:6px">${p.seen}/${p.size} ${t('studied')}</div>
   </div>`;
 }
 
@@ -138,7 +137,7 @@ function openUnitSheet(unitIdx, lvl) {
     }).join('');
     const inner = `
       <h2 style="font-size:1.25rem">${t('lesson')} ${unitIdx + 1}</h2>
-      <div class="muted" style="font-family:var(--font-en);direction:ltr">#${a + 1}–${b} · ${p.done}/${p.size} ${t('learned')}</div>
+      <div class="muted" style="font-family:var(--font-en);direction:ltr">#${a + 1}–${b} · ${p.seen}/${p.size} ${t('studied')}</div>
       <div style="display:flex;gap:10px;margin:14px 0">
         <button class="btn btn-primary" style="flex:1" data-studyu>${ICONS.play} ${t('study_unit')}</button>
         <button class="btn btn-ghost" style="flex:1" data-quizu>${ICONS.target} ${t('quiz_unit')}</button>
