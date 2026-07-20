@@ -9,7 +9,7 @@ import { grade, previewIntervals } from '../srs.js';
 import { speak } from '../speech.js';
 import { buildQueue, buildQueueForIndices } from '../session.js';
 import { unitWords } from '../data.js';
-import { wordVisual, wordThumb, definitionHTML, speakButton, listenAllButton, exploreLinks, wireSpeak, ringSVG, animateRings } from '../ui.js';
+import { wordPhoto, wordThumb, definitionHTML, speakButton, listenAllButton, videoEmbed, wireSpeak, wireMedia, ringSVG, animateRings } from '../ui.js';
 import { posLabel, posColor, escapeHtml } from '../util.js';
 import { checkBadges, badgeName } from '../achievements.js';
 import { toast, confetti } from '../fx.js';
@@ -63,7 +63,7 @@ function drawCard() {
       <div class="flashcard" id="card">
         <div class="face face-front">
           ${item.isNew ? `<span class="chip on card-flag">✦ ${t('new_short')}</span>` : ''}
-          <div class="fc-visual">${wordVisual(rec)}</div>
+          ${wordPhoto(rec)}
           <div class="word-en">${escapeHtml(rec.w)}</div>
           ${rec.i ? `<div class="word-ipa">/${escapeHtml(rec.i)}/</div>` : ''}
           <span class="pos-badge" style="background:${posColor(rec.p)}">${posLabel(rec.p, lang)}</span>
@@ -82,7 +82,7 @@ function drawCard() {
             ${listenAllButton(rec)}
           </div>
           ${definitionHTML(rec)}
-          ${exploreLinks(rec.w)}
+          ${videoEmbed(rec)}
         </div>
       </div>
     </div>
@@ -92,6 +92,7 @@ function drawCard() {
   card.addEventListener('click', (e) => { if (!e.target.closest('[data-speak]')) reveal(); });
   drawControls();
   wireSpeak(host);
+  wireMedia(host);
   host.querySelector('[data-exit]').addEventListener('click', () => navigate('home'));
   sess.revealed = false;
 }

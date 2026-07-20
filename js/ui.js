@@ -99,13 +99,82 @@ export function wordThumb(rec, col) {
   return `<span style="font-family:var(--font-en);font-weight:800;color:${c}">${escapeHtml(rec.w[0].toUpperCase())}</span>`;
 }
 
-// "Explore" links: see the word inside real videos / photos (opens externally).
-export function exploreLinks(word) {
-  const w = encodeURIComponent(word);
-  return `<div class="explore-row">
-    <a class="explore-btn" href="https://youglish.com/pronounce/${w}/english" target="_blank" rel="noopener">🎬 <span>${t('watch_videos')}</span></a>
-    <a class="explore-btn" href="https://openverse.org/search/image?q=${w}" target="_blank" rel="noopener">🖼️ <span>${t('see_images')}</span></a>
+// Stable pseudo-random number from a word (so each word keeps the same photo).
+function hashNum(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h % 100000; }
+
+// Which words are worth a real photo (skip pure function words — a random photo
+// for "the" would only confuse). Anything with a curated emoji/icon qualifies.
+export function wantsPhoto(rec) {
+  if (emojiFor(rec.w) || iconFor(rec.w)) return true;
+  return ['n', 'v', 'adj'].includes(rec.p) && rec.w.length > 3;
+}
+
+// Big visual with a REAL photo shown on top; if the photo can't load (offline /
+// no match) the emoji/icon/tile underneath stays — so it's never broken.
+export function wordPhoto(rec) {
+  const inner = wordVisual(rec);
+  if (!wantsPhoto(rec)) return `<div class="word-media">${inner}</div>`;
+  const src = `https://loremflickr.com/360/240/${encodeURIComponent(rec.w)}?lock=${hashNum(rec.w)}`;
+  return `<div class="word-media has-photo">
+    <div class="photo-fallback">${inner}</div>
+    <img class="word-photo" data-photo src="${src}" alt="${escapeHtml(rec.w)}" loading="lazy" referrerpolicy="no-referrer">
   </div>`;
+}
+
+// Inline video: a play button that embeds a YouGlish player right in the page
+// (the word spoken inside real video clips), instead of opening a new tab.
+export function videoEmbed(rec) {
+  return `<div class="video-embed" data-video="${escapeHtml(rec.w)}">
+    <button class="video-btn" type="button">${ICONS.play} <span>${t('watch_videos')}</span></button>
+    <div class="video-host" hidden></div>
+  </div>`;
+}
+
+// Lazy-load the YouGlish widget script once; resolve when its API is ready.
+let ygLoading = null;
+function ensureYouglish() {
+  if (window.YG && window.YG.Widget) return Promise.resolve();
+  if (ygLoading) return ygLoading;
+  ygLoading = new Promise((resolve) => {
+    window.onYouglishAPIReady = () => resolve();
+    const s = document.createElement('script');
+    s.src = 'https://youglish.com/public/emb/widget.js'; s.async = true; s.charset = 'utf-8';
+    s.onerror = () => resolve();
+    document.head.appendChild(s);
+    setTimeout(resolve, 5000);
+  });
+  return ygLoading;
+}
+let vidSeq = 0;
+
+// Wire embedded media within a scope: reveal photos on load (keep fallback on
+// error) and expand the inline video player on demand.
+export function wireMedia(scope) {
+  scope.querySelectorAll('img[data-photo]').forEach((img) => {
+    if (img.complete && img.naturalWidth) img.classList.add('ok');
+    img.addEventListener('load', () => { if (img.naturalWidth) img.classList.add('ok'); });
+    img.addEventListener('error', () => img.remove());
+  });
+  scope.querySelectorAll('.video-embed').forEach((box) => {
+    const btn = box.querySelector('.video-btn');
+    const host = box.querySelector('.video-host');
+    const word = box.dataset.video;
+    btn.addEventListener('click', async () => {
+      if (box.classList.contains('open')) { box.classList.remove('open'); host.hidden = true; host.innerHTML = ''; return; }
+      box.classList.add('open'); host.hidden = false;
+      const id = 'yg-' + (++vidSeq);
+      host.innerHTML = `<div class="yg-slot" id="${id}"></div>
+        <a class="yg-fallback" href="https://youglish.com/pronounce/${encodeURIComponent(word)}/english" target="_blank" rel="noopener">${t('open_youglish')}</a>`;
+      await ensureYouglish();
+      try {
+        if (window.YG && window.YG.Widget) {
+          const wig = new window.YG.Widget(id, { width: Math.min(520, host.clientWidth || 340), components: 9, autoStart: 1, bkgColor: 'theme_light' });
+          wig.fetch(word, 'english');
+          const fb = host.querySelector('.yg-fallback'); if (fb) fb.style.display = 'none';
+        }
+      } catch (e) { /* keep the fallback link visible */ }
+    });
+  });
 }
 
 export function speakButton(word) {
@@ -161,17 +230,18 @@ export function definitionHTML(rec) {
 
 export function openWordDetail(rec) {
   const inner = `
-    <div style="text-align:center">${wordVisual(rec)}</div>
-    <div style="text-align:center;margin:10px 0 4px">
+    ${wordPhoto(rec)}
+    <div style="text-align:center;margin:12px 0 4px">
       <div class="word-en">${escapeHtml(rec.w)}</div>
       ${rec.i ? `<div class="word-ipa">/${escapeHtml(rec.i)}/</div>` : ''}
       <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${speakButton(rec.w)}${listenAllButton(rec)}</div>
     </div>
     ${definitionHTML(rec)}
-    ${exploreLinks(rec.w)}
+    ${videoEmbed(rec)}
     <button class="btn btn-soft btn-block" style="margin-top:18px" data-close>${t('close')}</button>`;
   const ov = openSheet(inner);
   wireSpeak(ov);
+  wireMedia(ov);
   ov.querySelector('[data-close]').addEventListener('click', closeSheet);
   setTimeout(() => speak(rec.w), 250);
 }
